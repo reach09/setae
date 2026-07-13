@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SETAE - Secure Testing</title>
+    <style>
+        /* Minimalist professional styling */
+        body { font-family: 'Segoe UI', sans-serif; background: #fff; color: #333; margin: 0; }
+        .module { display: none; padding: 20px; }
+        .active { display: block; }
+        .split-container { display: flex; height: 80vh; }
+        iframe { width: 60%; height: 100%; border: none; }
+        .input-grid { width: 40%; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 20px; }
+        textarea { width: 100%; height: 300px; }
+    </style>
+</head>
+<body oncontextmenu="return false;" onselectstart="return false;">
+
+    <div id="reading" class="module active">
+        <div class="split-container">
+            <iframe id="pdfFrame"></iframe>
+            <div id="answerGrid" class="input-grid"></div>
+        </div>
+    </div>
+
+    <div id="listening" class="module">
+        <audio id="audioPlayer"></audio>
+        <button id="startAudio">Start Audio</button>
+    </div>
+
+    <div id="writing" class="module">
+        <textarea id="essayBox" placeholder="Start writing here..."></textarea>
+        <p>Words: <span id="wordCount">0</span></p>
+        <button onclick="handleFinalSubmit()">Submit Exam</button>
+    </div>
+
+    <!-- Firebase SDK Scripts here -->
+    <script type="module" src="app.js"></script>
+</body>
+</html>
