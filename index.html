@@ -1,40 +1,1045 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>SETAE - Secure Testing</title>
-    <style>
-        /* Minimalist professional styling */
-        body { font-family: 'Segoe UI', sans-serif; background: #fff; color: #333; margin: 0; }
-        .module { display: none; padding: 20px; }
-        .active { display: block; }
-        .split-container { display: flex; height: 80vh; }
-        iframe { width: 60%; height: 100%; border: none; }
-        .input-grid { width: 40%; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 20px; }
-        textarea { width: 100%; height: 300px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SETAE — Standardized English Testing Assessments</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --maroon:#7A1F42;
+    --maroon-dark:#5E1732;
+    --maroon-light:#F6EEF1;
+    --ink:#1C1C1C;
+    --muted:#7a7a7a;
+    --bg:#FFFFFF;
+    --good:#2E7D46;
+    --bad:#B3261E;
+    --radius:6px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Poppins',sans-serif;
+    color:var(--ink);
+    background:var(--bg);
+    min-height:100vh;
+    position:relative;
+    overflow-x:hidden;
+  }
+  /* watermark background */
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    z-index:-1;
+    background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="360" height="220"><text x="0" y="60" font-family="Poppins, sans-serif" font-weight="700" font-size="54" fill="%237A1F42" opacity="0.05">SETAE</text><text x="0" y="180" font-family="Poppins, sans-serif" font-weight="700" font-size="54" fill="%237A1F42" opacity="0.05">SETAE</text></svg>');
+    background-repeat:repeat;
+  }
+  .topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    padding:32px 48px 0 48px;
+  }
+  .brand{display:flex;flex-direction:column;}
+  .brand-logo{font-size:44px;font-weight:700;color:var(--maroon);letter-spacing:1px;line-height:1;}
+  .brand-logo sup{font-size:14px;}
+  .brand-sub{font-size:12px;color:var(--ink);margin-top:6px;max-width:200px;line-height:1.3;}
+  .site-title{text-align:right;}
+  .site-title .main{font-size:20px;color:var(--ink);}
+  .site-title .sub{font-size:12px;color:var(--muted);margin-top:2px;}
+
+  .container{max-width:1100px;margin:0 auto;padding:40px 48px 80px 48px;}
+  .page-heading{font-size:32px;font-weight:600;margin:0 0 4px 0;}
+  .page-subheading{font-size:17px;color:var(--ink);margin:0 0 28px 0;}
+
+  .box-btn{
+    display:block;
+    width:100%;
+    max-width:520px;
+    text-align:left;
+    background:transparent;
+    border:1.5px solid var(--maroon);
+    border-radius:14px;
+    padding:20px 24px;
+    font-family:'Poppins',sans-serif;
+    font-size:18px;
+    color:var(--ink);
+    cursor:pointer;
+    margin-bottom:20px;
+    transition:background .15s ease;
+  }
+  .box-btn:hover{background:var(--maroon-light);}
+  .box-btn:disabled{opacity:.45;cursor:not-allowed;}
+  .box-btn.small{max-width:320px;font-size:15px;padding:14px 20px;border-radius:10px;}
+
+  .row-btns{display:flex;gap:24px;flex-wrap:wrap;}
+  .row-btns .box-btn{flex:1;min-width:220px;max-width:340px;text-align:center;}
+
+  input[type=text],input[type=email],input[type=number],input[type=password],textarea{
+    font-family:'Poppins',sans-serif;
+    font-size:16px;
+    border:1.5px solid var(--maroon);
+    border-radius:10px;
+    padding:14px 18px;
+    width:100%;
+    max-width:520px;
+    display:block;
+    margin-bottom:18px;
+    color:var(--ink);
+    background:#fff;
+  }
+  input::placeholder,textarea::placeholder{color:#9a9a9a;}
+  label.field-label{display:block;font-size:13px;color:var(--muted);margin:-10px 0 6px 2px;}
+
+  .btn-solid{
+    background:var(--maroon);
+    color:#fff;
+    border:1.5px solid var(--maroon);
+    border-radius:10px;
+    padding:14px 30px;
+    font-family:'Poppins',sans-serif;
+    font-size:16px;
+    font-weight:500;
+    cursor:pointer;
+  }
+  .btn-solid:hover{background:var(--maroon-dark);}
+  .btn-solid:disabled{opacity:.5;cursor:not-allowed;}
+  .btn-outline{
+    background:transparent;
+    color:var(--ink);
+    border:1.5px solid var(--maroon);
+    border-radius:10px;
+    padding:14px 30px;
+    font-family:'Poppins',sans-serif;
+    font-size:16px;
+    cursor:pointer;
+  }
+  .btn-outline:hover{background:var(--maroon-light);}
+  .btn-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;}
+
+  .hint-italic{font-style:italic;color:var(--muted);font-size:14px;margin-top:-6px;}
+
+  .login-card{
+    max-width:820px;
+    margin:60px auto 0 auto;
+    border:1.5px solid var(--maroon);
+    border-radius:16px;
+    padding:36px 40px 40px 40px;
+  }
+  .login-card h1{font-size:34px;font-weight:600;margin:0 0 24px 0;}
+
+  .top-nav-link{
+    background:none;border:none;color:var(--maroon);font-family:'Poppins',sans-serif;
+    font-size:14px;cursor:pointer;text-decoration:underline;padding:0;margin-bottom:18px;
+  }
+
+  .card-outline{
+    border:1.5px solid var(--maroon);
+    border-radius:12px;
+    padding:22px 24px;
+    margin-bottom:16px;
+  }
+
+  .split-view{display:flex;gap:28px;align-items:flex-start;}
+  .split-left{flex:1.3;min-width:0;}
+  .split-right{flex:1;min-width:0;}
+
+  .paper-frame{
+    border:1.5px solid var(--maroon);
+    border-radius:10px;
+    overflow:hidden;
+    height:640px;
+    background:#fafafa;
+  }
+  .paper-frame iframe{width:100%;height:100%;border:none;}
+
+  .answer-sheet{
+    border:1.5px solid var(--maroon);
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .answer-sheet-header{
+    background:var(--maroon);
+    color:#fff;
+    text-align:center;
+    font-weight:600;
+    padding:10px 0;
+    font-size:15px;
+  }
+  .answer-grid{display:grid;grid-template-columns:1fr 1fr;}
+  .answer-cell{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 14px;
+    border-bottom:1px solid #e7d9de;
+    border-right:1px solid #e7d9de;
+  }
+  .answer-cell:nth-child(even){border-right:none;}
+  .answer-cell .num{font-weight:600;color:var(--maroon);width:20px;flex-shrink:0;}
+  .answer-cell input{margin:0;padding:6px 8px;font-size:14px;max-width:none;border-radius:6px;border-width:1px;}
+
+  .timer-pill{
+    display:inline-block;
+    border:1.5px solid var(--maroon);
+    border-radius:20px;
+    padding:8px 20px;
+    font-weight:600;
+    font-size:16px;
+    color:var(--maroon);
+    margin-bottom:20px;
+  }
+  .timer-pill.low{color:var(--bad);border-color:var(--bad);}
+
+  .headphone-btn{
+    display:flex;align-items:center;justify-content:center;gap:14px;
+    width:100%;max-width:520px;
+    border:1.5px solid var(--maroon);
+    border-radius:14px;
+    padding:34px 20px;
+    background:transparent;
+    cursor:pointer;
+    font-family:'Poppins',sans-serif;
+    font-size:17px;
+    color:var(--ink);
+    margin-bottom:24px;
+  }
+  .headphone-btn:disabled{opacity:.4;cursor:not-allowed;}
+  .headphone-btn svg{flex-shrink:0;}
+
+  table.data-table{width:100%;border-collapse:collapse;margin-bottom:24px;}
+  table.data-table th,table.data-table td{
+    border:1px solid #e2c9d3;
+    padding:10px 14px;
+    text-align:left;
+    font-size:14px;
+  }
+  table.data-table th{background:var(--maroon-light);color:var(--maroon-dark);}
+
+  .badge{
+    display:inline-block;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600;
+  }
+  .badge.live{background:#e5f3ea;color:var(--good);}
+  .badge.draft{background:#f1f1f1;color:#666;}
+  .badge.contacted{background:#e5f3ea;color:var(--good);}
+  .badge.pending{background:#fdeeee;color:var(--bad);}
+
+  .code-modal-backdrop{
+    position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:50;
+  }
+  .code-modal{
+    background:#fff;border:1.5px solid var(--maroon);border-radius:14px;padding:36px 40px;max-width:420px;text-align:center;
+  }
+  .code-modal .code{font-size:36px;font-weight:700;letter-spacing:4px;color:var(--maroon);margin:16px 0;}
+
+  .error-text{color:var(--bad);font-size:14px;margin:-8px 0 14px 2px;}
+  .muted{color:var(--muted);}
+  .section-gap{margin-top:36px;}
+  .flex-between{display:flex;justify-content:space-between;align-items:center;}
+</style>
 </head>
-<body oncontextmenu="return false;" onselectstart="return false;">
+<body>
+<div id="app"></div>
 
-    <div id="reading" class="module active">
-        <div class="split-container">
-            <iframe id="pdfFrame"></iframe>
-            <div id="answerGrid" class="input-grid"></div>
+<script type="module">
+/* ======================================================================
+   FIREBASE CONFIG — paste your project's config object below.
+   You said you'll create the Firebase project yourself — once you do,
+   copy the config from Project Settings > General > Your apps > SDK setup,
+   and paste it in place of the placeholder object.
+   ====================================================================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyAfE9JLjrbCUBT_Aw9WXcGz1fm5nMfruog",
+  authDomain: "setae-b5683.firebaseapp.com",
+  projectId: "setae-b5683",
+  storageBucket: "setae-b5683.firebasestorage.app",
+  messagingSenderId: "164185859545",
+  appId: "1:164185859545:web:df4862c1bfece44a89a5c8"
+};
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, collection, doc, getDoc, getDocs, setDoc, addDoc,
+  updateDoc, query, where, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+const ADMIN_EMAIL = "support.setae@gmail.com";
+const SUBJECTS = ["reading","listening","writing"];
+const SUBJECT_LABELS = {reading:"Reading", listening:"Listening", writing:"Writing"};
+
+/* ---------------------------- helpers ---------------------------- */
+
+function genCode(len=6){
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let out = "";
+  for(let i=0;i<len;i++) out += chars[Math.floor(Math.random()*chars.length)];
+  return out;
+}
+
+// Converts a Google Drive share link into an embeddable preview URL.
+function toDrivePreview(url){
+  if(!url) return "";
+  const m = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+  const id = m ? m[1] : null;
+  if(id) return `https://drive.google.com/file/d/${id}/preview`;
+  return url; // fallback, assume already a preview/embeddable link
+}
+
+// Converts a Google Drive share link into a direct-stream link for <audio>.
+function toDriveDirect(url){
+  if(!url) return "";
+  const m = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+  const id = m ? m[1] : null;
+  if(id) return `https://drive.google.com/uc?export=download&id=${id}`;
+  return url;
+}
+
+function escapeHtml(s){
+  return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+/* ---------------------------- state ---------------------------- */
+
+let state = {
+  view: "login",           // login | admin_home | admin_subjects | admin_variation_list | admin_create_variation | admin_view_variations | admin_view_results | exam
+  loginError: "",
+  currentSubject: null,
+  variations: [],          // cached list for currentSubject
+  examSession: null,       // {subject, variation, candidateEmail, timeLeftSec, timerId, hasPlayedAudio, answers, essayText}
+  loading: false
+};
+
+const root = document.getElementById("app");
+
+function render(){
+  switch(state.view){
+    case "login": return renderLogin();
+    case "admin_home": return renderAdminHome();
+    case "admin_subjects": return renderAdminSubjects();
+    case "admin_variation_list": return renderVariationList();
+    case "admin_create_variation": return renderCreateVariation();
+    case "admin_view_variations": return renderViewVariationsAll();
+    case "admin_view_results": return renderViewResults();
+    case "exam": return renderExam();
+    default: return renderLogin();
+  }
+}
+
+function topbar(subtitle){
+  return `
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-logo">SETAE<sup>&reg;</sup></div>
+      <div class="brand-sub">Standardized English Testing Assessments for Everyone</div>
+    </div>
+    <div class="site-title">
+      <div class="main">Standardized English Testing</div>
+      <div class="sub">${escapeHtml(subtitle || "Demo Testing")}</div>
+    </div>
+  </div>`;
+}
+
+/* ============================ LOGIN ============================ */
+
+function renderLogin(){
+  root.innerHTML = `
+    ${topbar("Demo Testing")}
+    <div class="login-card">
+      <h1>Demo Guest Log-in</h1>
+      <label class="field-label">Electronic-Mail</label>
+      <input type="text" id="loginEmail" placeholder="Electronic-Mail" autocomplete="off">
+      <label class="field-label" id="secondFieldLabel">Code</label>
+      <input type="text" id="loginCode" placeholder="Code" autocomplete="off" style="max-width:220px;">
+      ${state.loginError ? `<div class="error-text">${escapeHtml(state.loginError)}</div>` : ""}
+      <div class="btn-row">
+        <button class="btn-solid" id="loginBtn">Log-in</button>
+      </div>
+      <div class="hint-italic" style="margin-top:14px;">Type any username as your email — it's just how we'll identify your submission to the admin.</div>
+    </div>
+  `;
+  const emailEl = document.getElementById("loginEmail");
+  const codeEl = document.getElementById("loginCode");
+  const labelEl = document.getElementById("secondFieldLabel");
+  emailEl.addEventListener("input", () => {
+    if(emailEl.value.trim().toLowerCase() === ADMIN_EMAIL){
+      codeEl.type = "password";
+      codeEl.placeholder = "Admin password";
+      labelEl.textContent = "Password";
+    } else {
+      codeEl.type = "text";
+      codeEl.placeholder = "Code";
+      labelEl.textContent = "Code";
+    }
+  });
+  document.getElementById("loginBtn").onclick = handleLogin;
+  codeEl.addEventListener("keydown", e => { if(e.key==="Enter") handleLogin(); });
+}
+
+async function handleLogin(){
+  const email = document.getElementById("loginEmail").value.trim();
+  const secondVal = document.getElementById("loginCode").value.trim();
+
+  if(!email){ state.loginError = "Please enter an email or username."; render(); return; }
+
+  if(email.toLowerCase() === ADMIN_EMAIL){
+    if(!secondVal){ state.loginError = "Please enter the admin password."; render(); return; }
+    state.loading = true;
+    try{
+      await signInWithEmailAndPassword(auth, email, secondVal);
+      state.loginError = "";
+      state.view = "admin_home";
+    } catch(err){
+      console.error(err);
+      state.loginError = "Incorrect admin password.";
+    }
+    state.loading = false;
+    render();
+    return;
+  }
+
+  const code = secondVal.toUpperCase();
+  if(!code){ state.loginError = "Please enter your code."; render(); return; }
+
+  // find which subject this code belongs to
+  state.loading = true;
+  try{
+    let matchedSubject = null;
+    for(const subj of SUBJECTS){
+      const ref = doc(db, "subjects", subj);
+      const snap = await getDoc(ref);
+      if(snap.exists() && snap.data().code === code){ matchedSubject = subj; break; }
+    }
+    if(!matchedSubject){
+      state.loginError = "That code isn't valid. Double check with your test administrator.";
+      state.loading = false; render(); return;
+    }
+    // pick a random released variation for that subject
+    const q = query(collection(db,"variations"), where("subject","==",matchedSubject), where("released","==",true));
+    const snaps = await getDocs(q);
+    const options = [];
+    snaps.forEach(s => options.push({id:s.id, ...s.data()}));
+    if(options.length === 0){
+      state.loginError = "No exam papers are available for this subject yet. Please check back later.";
+      state.loading = false; render(); return;
+    }
+    const chosen = options[Math.floor(Math.random()*options.length)];
+    startExamSession(matchedSubject, chosen, email);
+  } catch(err){
+    console.error(err);
+    state.loginError = "Something went wrong connecting to the server.";
+  }
+  state.loading = false;
+  render();
+}
+
+/* ============================ ADMIN HOME ============================ */
+
+function renderAdminHome(){
+  root.innerHTML = `
+    ${topbar("Demo Testing")}
+    <div class="container">
+      <h1 class="page-heading">Administrative Department</h1>
+      <div style="margin-top:28px;">
+        <button class="box-btn" id="btnEditExams">Edit Examinations</button>
+        <button class="box-btn" id="btnViewVariations">View Variations</button>
+        <button class="box-btn" id="btnViewResults">View Results</button>
+      </div>
+      <div style="position:fixed; bottom:40px; right:48px;">
+        <button class="btn-outline" id="btnLogout">Log out</button>
+      </div>
+    </div>
+  `;
+  document.getElementById("btnEditExams").onclick = () => { state.view="admin_subjects"; render(); };
+  document.getElementById("btnViewVariations").onclick = () => { state.view="admin_view_variations"; render(); };
+  document.getElementById("btnViewResults").onclick = () => { state.view="admin_view_results"; render(); };
+  document.getElementById("btnLogout").onclick = async () => { await signOut(auth); state = {...state, view:"login", loginError:""}; render(); };
+}
+
+/* ============================ SUBJECT PICKER ============================ */
+
+function renderAdminSubjects(){
+  root.innerHTML = `
+    ${topbar("an inspiration")}
+    <div class="container">
+      <button class="top-nav-link" id="back">&larr; Back to Administrative Department</button>
+      <h1 class="page-heading">Administrative Department</h1>
+      <div class="page-subheading">Edit Examinations</div>
+      <div class="row-btns" style="margin-top:20px;">
+        <button class="box-btn" data-subj="reading">Reading</button>
+        <button class="box-btn" data-subj="listening">Listening</button>
+        <button class="box-btn" data-subj="writing">Writing</button>
+      </div>
+      <div class="section-gap">
+        <button class="box-btn small" id="viewOther">View other variations</button>
+      </div>
+    </div>
+  `;
+  document.getElementById("back").onclick = () => { state.view="admin_home"; render(); };
+  document.getElementById("viewOther").onclick = () => { state.view="admin_view_variations"; render(); };
+  root.querySelectorAll("[data-subj]").forEach(btn=>{
+    btn.onclick = async () => {
+      state.currentSubject = btn.dataset.subj;
+      await loadVariationsForSubject(state.currentSubject);
+      if(state.variations.length === 0){
+        state.view = "admin_create_variation";
+      } else {
+        state.view = "admin_variation_list";
+      }
+      render();
+    };
+  });
+}
+
+async function loadVariationsForSubject(subject){
+  const q = query(collection(db,"variations"), where("subject","==",subject));
+  const snaps = await getDocs(q);
+  const list = [];
+  snaps.forEach(s => list.push({id:s.id, ...s.data()}));
+  list.sort((a,b) => (b.createdAtMs||0)-(a.createdAtMs||0));
+  state.variations = list;
+}
+
+/* ============================ VARIATION LIST (existing) ============================ */
+
+function renderVariationList(){
+  const subj = state.currentSubject;
+  root.innerHTML = `
+    ${topbar("an inspiration")}
+    <div class="container">
+      <button class="top-nav-link" id="back">&larr; Back to subjects</button>
+      <h1 class="page-heading">Administrative Department</h1>
+      <div class="page-subheading">Edit Examinations — ${SUBJECT_LABELS[subj]}</div>
+
+      <div id="listWrap"></div>
+
+      <div class="section-gap">
+        <button class="btn-solid" id="addNew">+ Add another variation</button>
+      </div>
+    </div>
+  `;
+  document.getElementById("back").onclick = () => { state.view="admin_subjects"; render(); };
+  document.getElementById("addNew").onclick = () => { state.view="admin_create_variation"; render(); };
+
+  const wrap = document.getElementById("listWrap");
+  if(state.variations.length===0){
+    wrap.innerHTML = `<p class="muted">No variations yet for ${SUBJECT_LABELS[subj]}.</p>`;
+    return;
+  }
+  wrap.innerHTML = `
+    <table class="data-table">
+      <thead><tr><th>#</th><th>Status</th><th>Questions</th><th>Time allowed</th><th>Created</th></tr></thead>
+      <tbody>
+        ${state.variations.map((v,i)=>`
+          <tr>
+            <td>${i+1}</td>
+            <td>${v.released ? '<span class="badge live">Live</span>' : '<span class="badge draft">Draft</span>'}</td>
+            <td>${v.numQuestions ?? "—"}</td>
+            <td>${v.timeAllowed ? v.timeAllowed + " min" : "—"}</td>
+            <td>${v.createdAtMs ? new Date(v.createdAtMs).toLocaleDateString() : "—"}</td>
+          </tr>`).join("")}
+      </tbody>
+    </table>
+  `;
+}
+
+/* ============================ CREATE VARIATION ============================ */
+
+function renderCreateVariation(){
+  const subj = state.currentSubject;
+  root.innerHTML = `
+    ${topbar("an inspiration")}
+    <div class="container">
+      <button class="top-nav-link" id="back">&larr; Back to ${SUBJECT_LABELS[subj]}</button>
+      <h1 class="page-heading">Administrative Department</h1>
+      <div class="page-subheading">Edit Examinations — ${SUBJECT_LABELS[subj]}</div>
+      <h3 style="margin-top:24px;">Create New Variation</h3>
+
+      <div class="split-view">
+        <div class="split-left">
+          ${subj==="listening" ? `
+            <label class="field-label">Google Drive audio link (mp3)</label>
+            <input type="text" id="mediaLink" placeholder="https://drive.google.com/file/d/.../view">
+          ` : `
+            <label class="field-label">Google Drive exam paper link</label>
+            <input type="text" id="mediaLink" placeholder="https://drive.google.com/file/d/.../view">
+          `}
+
+          ${subj!=="writing" ? `
+            <label class="field-label">Number of answer boxes</label>
+            <input type="number" id="numQuestions" min="1" max="60" placeholder="e.g. 20" style="max-width:160px;">
+          ` : ""}
+
+          <label class="field-label">Time allowed (minutes)</label>
+          <input type="number" id="timeAllowed" min="1" max="240" placeholder="e.g. 45" style="max-width:160px;">
+
+          <div id="answersWrap"></div>
+
+          <div class="btn-row" style="margin-top:20px;">
+            <button class="btn-outline" id="saveBtn">Save</button>
+            <button class="btn-solid" id="releaseBtn">Release Paper</button>
+          </div>
+          <div id="formMsg" class="muted" style="margin-top:10px;"></div>
         </div>
-    </div>
 
-    <div id="listening" class="module">
-        <audio id="audioPlayer"></audio>
-        <button id="startAudio">Start Audio</button>
+        <div class="split-right">
+          <div class="muted" style="margin-bottom:8px;">Preview</div>
+          ${subj!=="writing" ? `
+          <div class="answer-sheet" id="answerPreview"></div>` : `<p class="muted">Writing variations use a free-text response — no answer sheet needed.</p>`}
+        </div>
+      </div>
     </div>
+  `;
 
-    <div id="writing" class="module">
-        <textarea id="essayBox" placeholder="Start writing here..."></textarea>
-        <p>Words: <span id="wordCount">0</span></p>
-        <button onclick="handleFinalSubmit()">Submit Exam</button>
+  document.getElementById("back").onclick = () => { state.view = state.variations.length ? "admin_variation_list" : "admin_subjects"; render(); };
+
+  const numQEl = document.getElementById("numQuestions");
+  if(numQEl){
+    numQEl.addEventListener("input", renderAnswerInputs);
+  }
+  renderAnswerInputs();
+
+  document.getElementById("saveBtn").onclick = () => saveVariation(false);
+  document.getElementById("releaseBtn").onclick = () => saveVariation(true);
+}
+
+function renderAnswerInputs(){
+  const subj = state.currentSubject;
+  if(subj==="writing") return;
+  const n = parseInt(document.getElementById("numQuestions")?.value || "0", 10);
+  const wrap = document.getElementById("answersWrap");
+  const preview = document.getElementById("answerPreview");
+  if(!n || n<1){
+    wrap.innerHTML = "";
+    if(preview) preview.innerHTML = `<div class="answer-sheet-header">Answer Sheet</div><div style="padding:16px;" class="muted">Set the number of answer boxes to preview.</div>`;
+    return;
+  }
+  let rows = "";
+  for(let i=1;i<=n;i++){
+    rows += `<div class="answer-cell"><span class="num">${i}</span><input type="text" data-ans-idx="${i-1}" placeholder="Correct answer" class="correctAnsInput"></div>`;
+  }
+  wrap.innerHTML = `<label class="field-label" style="margin-top:8px;">Correct answers</label><div class="answer-sheet">${rows}</div>`;
+
+  if(preview){
+    let prevRows = "";
+    for(let i=1;i<=n;i++){
+      prevRows += `<div class="answer-cell"><span class="num">${i}</span><span class="muted">candidate types here</span></div>`;
+    }
+    preview.innerHTML = `<div class="answer-sheet-header">Answer Sheet</div><div class="answer-grid">${prevRows}</div>`;
+  }
+}
+
+async function saveVariation(release){
+  const subj = state.currentSubject;
+  const mediaLink = document.getElementById("mediaLink")?.value.trim();
+  const timeAllowed = parseInt(document.getElementById("timeAllowed")?.value || "0",10);
+  const numQuestions = subj!=="writing" ? parseInt(document.getElementById("numQuestions")?.value||"0",10) : null;
+  const msg = document.getElementById("formMsg");
+
+  if(!mediaLink){ msg.textContent = subj==="listening" ? "Please add the audio link." : "Please add the exam paper link."; msg.style.color="var(--bad)"; return; }
+  if(!timeAllowed || timeAllowed<1){ msg.textContent = "Please set the time allowed."; msg.style.color="var(--bad)"; return; }
+  if(subj!=="writing" && (!numQuestions || numQuestions<1)){ msg.textContent = "Please set the number of answer boxes."; msg.style.color="var(--bad)"; return; }
+
+  let answers = null;
+  if(subj!=="writing"){
+    answers = Array.from(document.querySelectorAll(".correctAnsInput")).map(el=>el.value.trim());
+    if(answers.some(a=>!a)){ msg.textContent = "Please fill in every correct answer."; msg.style.color="var(--bad)"; return; }
+  }
+
+  msg.textContent = "Saving...";
+  msg.style.color = "var(--muted)";
+
+  const data = {
+    subject: subj,
+    timeAllowed,
+    released: !!release,
+    createdAtMs: Date.now(),
+    createdAt: serverTimestamp()
+  };
+  if(subj==="listening") data.audioLink = mediaLink; else data.paperLink = mediaLink;
+  if(numQuestions){ data.numQuestions = numQuestions; data.answers = answers; }
+
+  try{
+    await addDoc(collection(db,"variations"), data);
+    const code = await getOrCreateSubjectCode(subj);
+    msg.textContent = "";
+    showCodeModal(subj, code);
+  } catch(err){
+    console.error(err);
+    msg.textContent = "Couldn't save — check your Firebase config and connection.";
+    msg.style.color = "var(--bad)";
+  }
+}
+
+async function getOrCreateSubjectCode(subject){
+  const ref = doc(db,"subjects",subject);
+  const snap = await getDoc(ref);
+  if(snap.exists() && snap.data().code) return snap.data().code;
+  const code = genCode();
+  await setDoc(ref, {code}, {merge:true});
+  return code;
+}
+
+function showCodeModal(subj, code){
+  const backdrop = document.createElement("div");
+  backdrop.className = "code-modal-backdrop";
+  backdrop.innerHTML = `
+    <div class="code-modal">
+      <div>Guest log-in code for <strong>${SUBJECT_LABELS[subj]}</strong></div>
+      <div class="code">${code}</div>
+      <div class="muted" style="font-size:13px; margin-bottom:20px;">This code is shared across all released ${SUBJECT_LABELS[subj]} variations — guests entering it get a random one.</div>
+      <button class="btn-solid" id="closeModal">Done</button>
     </div>
+  `;
+  document.body.appendChild(backdrop);
+  document.getElementById("closeModal").onclick = async () => {
+    document.body.removeChild(backdrop);
+    await loadVariationsForSubject(subj);
+    state.view = "admin_variation_list";
+    render();
+  };
+}
 
-    <!-- Firebase SDK Scripts here -->
-    <script type="module" src="app.js"></script>
+/* ============================ VIEW VARIATIONS (all subjects) ============================ */
+
+async function renderViewVariationsAll(){
+  root.innerHTML = `${topbar("an inspiration")}<div class="container"><p class="muted">Loading...</p></div>`;
+  const all = {};
+  for(const subj of SUBJECTS){
+    const q = query(collection(db,"variations"), where("subject","==",subj));
+    const snaps = await getDocs(q);
+    const list = [];
+    snaps.forEach(s=>list.push({id:s.id, ...s.data()}));
+    list.sort((a,b)=>(b.createdAtMs||0)-(a.createdAtMs||0));
+    all[subj] = list;
+    const codeSnap = await getDoc(doc(db,"subjects",subj));
+    all[subj+"_code"] = codeSnap.exists() ? codeSnap.data().code : null;
+  }
+
+  root.innerHTML = `
+    ${topbar("an inspiration")}
+    <div class="container">
+      <button class="top-nav-link" id="back">&larr; Back to Administrative Department</button>
+      <h1 class="page-heading">Administrative Department</h1>
+      <div class="page-subheading">View Variations</div>
+
+      ${SUBJECTS.map(subj => `
+        <div class="section-gap">
+          <div class="flex-between">
+            <h3 style="margin:0;">${SUBJECT_LABELS[subj]}</h3>
+            <span class="muted">Code: <strong>${all[subj+"_code"] || "not yet generated"}</strong></span>
+          </div>
+          ${all[subj].length===0 ? `<p class="muted">No variations created yet.</p>` : `
+          <table class="data-table">
+            <thead><tr><th>#</th><th>Status</th><th>Questions</th><th>Time</th><th>Created</th><th></th></tr></thead>
+            <tbody>
+              ${all[subj].map((v,i)=>`
+                <tr>
+                  <td>${i+1}</td>
+                  <td>${v.released ? '<span class="badge live">Live</span>' : '<span class="badge draft">Draft</span>'}</td>
+                  <td>${v.numQuestions ?? "—"}</td>
+                  <td>${v.timeAllowed ? v.timeAllowed+" min" : "—"}</td>
+                  <td>${v.createdAtMs ? new Date(v.createdAtMs).toLocaleDateString() : "—"}</td>
+                  <td>${v.released ? "" : `<button class="btn-outline" style="padding:6px 14px;font-size:13px;" data-release="${v.id}" data-subj="${subj}">Release</button>`}</td>
+                </tr>`).join("")}
+            </tbody>
+          </table>`}
+        </div>
+      `).join("")}
+    </div>
+  `;
+  document.getElementById("back").onclick = () => { state.view="admin_home"; render(); };
+  root.querySelectorAll("[data-release]").forEach(btn=>{
+    btn.onclick = async () => {
+      await updateDoc(doc(db,"variations",btn.dataset.release), {released:true});
+      await getOrCreateSubjectCode(btn.dataset.subj);
+      renderViewVariationsAll();
+    };
+  });
+}
+
+/* ============================ VIEW RESULTS ============================ */
+
+async function renderViewResults(){
+  root.innerHTML = `${topbar("an inspiration")}<div class="container"><p class="muted">Loading submissions...</p></div>`;
+  const snaps = await getDocs(collection(db,"submissions"));
+  const subs = [];
+  snaps.forEach(s=>subs.push({id:s.id, ...s.data()}));
+  subs.sort((a,b)=>(b.submittedAtMs||0)-(a.submittedAtMs||0));
+
+  root.innerHTML = `
+    ${topbar("an inspiration")}
+    <div class="container">
+      <button class="top-nav-link" id="back">&larr; Back to Administrative Department</button>
+      <h1 class="page-heading">Administrative Department</h1>
+      <div class="page-subheading">View Results</div>
+      <p class="muted">Grading is manual — contact each candidate directly with their results.</p>
+
+      ${subs.length===0 ? `<p class="muted">No submissions yet.</p>` : subs.map(s=>`
+        <div class="card-outline">
+          <div class="flex-between">
+            <div>
+              <strong>${escapeHtml(s.candidateEmail)}</strong>
+              &nbsp;·&nbsp; ${SUBJECT_LABELS[s.subject] || s.subject}
+              &nbsp;·&nbsp; <span class="muted">${s.submittedAtMs ? new Date(s.submittedAtMs).toLocaleString() : ""}</span>
+            </div>
+            <span class="badge ${s.contacted ? "contacted" : "pending"}">${s.contacted ? "Contacted" : "Not yet contacted"}</span>
+          </div>
+          <div style="margin-top:14px;">
+            ${s.subject==="writing" ? `
+              <div class="muted" style="margin-bottom:6px;">Submitted essay:</div>
+              <div style="white-space:pre-wrap; border:1px solid #eee; border-radius:8px; padding:12px; max-height:220px; overflow:auto;">${escapeHtml(s.essayText || "(empty)")}</div>
+            ` : `
+              <table class="data-table">
+                <thead><tr><th>#</th><th>Candidate answer</th><th>Correct answer</th></tr></thead>
+                <tbody>
+                  ${(s.answers||[]).map((a,i)=>`
+                    <tr><td>${i+1}</td><td>${escapeHtml(a)}</td><td>${escapeHtml((s.correctAnswers||[])[i] ?? "")}</td></tr>
+                  `).join("")}
+                </tbody>
+              </table>
+            `}
+          </div>
+          ${!s.contacted ? `<button class="btn-outline" data-mark="${s.id}" style="padding:8px 18px;font-size:13px;">Mark as contacted</button>` : ""}
+        </div>
+      `).join("")}
+    </div>
+  `;
+  document.getElementById("back").onclick = () => { state.view="admin_home"; render(); };
+  root.querySelectorAll("[data-mark]").forEach(btn=>{
+    btn.onclick = async () => {
+      await updateDoc(doc(db,"submissions",btn.dataset.mark), {contacted:true});
+      renderViewResults();
+    };
+  });
+}
+
+/* ============================ EXAM (candidate) ============================ */
+
+function startExamSession(subject, variation, candidateEmail){
+  state.examSession = {
+    subject, variation, candidateEmail,
+    timeLeftSec: (variation.timeAllowed||30)*60,
+    hasPlayedAudio: false,
+    answers: variation.numQuestions ? new Array(variation.numQuestions).fill("") : null,
+    essayText: "",
+    submitted: false,
+    tabSwitchCount: 0,
+    wasHidden: false
+  };
+  state.view = "exam";
+}
+
+function renderExam(){
+  const s = state.examSession;
+  const subj = s.subject;
+  const v = s.variation;
+
+  clearExamTimer();
+
+  root.innerHTML = `
+    ${topbar("Demo Testing")}
+    <div class="container">
+      <div class="timer-pill" id="timerPill">${formatTime(s.timeLeftSec)}</div>
+      <h1 class="page-heading">${SUBJECT_LABELS[subj]} Exam</h1>
+      <div class="split-view">
+        <div class="split-left">
+          ${subj==="listening" ? renderListeningMedia(v) : `
+            <div class="paper-frame">
+              <iframe src="${toDrivePreview(v.paperLink)}" allow="autoplay"></iframe>
+            </div>
+          `}
+        </div>
+        <div class="split-right">
+          ${subj==="writing" ? `
+            <textarea id="essayBox" placeholder="Type your response here..." style="height:600px; max-width:none; resize:vertical;">${escapeHtml(s.essayText)}</textarea>
+          ` : `
+            <div class="answer-sheet">
+              <div class="answer-sheet-header">Answer Sheet</div>
+              <div class="answer-grid">
+                ${v.numQuestions ? Array.from({length:v.numQuestions}).map((_,i)=>`
+                  <div class="answer-cell">
+                    <span class="num">${i+1}</span>
+                    <input type="text" data-candidate-idx="${i}" value="${escapeHtml(s.answers[i]||"")}">
+                  </div>
+                `).join("") : ""}
+              </div>
+            </div>
+          `}
+        </div>
+      </div>
+      <div class="btn-row" style="margin-top:24px;">
+        <button class="btn-solid" id="submitBtn">Submit Exam</button>
+      </div>
+    </div>
+  `;
+
+  if(subj==="writing"){
+    document.getElementById("essayBox").addEventListener("input", e => { s.essayText = e.target.value; });
+  } else {
+    root.querySelectorAll("[data-candidate-idx]").forEach(inp=>{
+      inp.addEventListener("input", e => { s.answers[e.target.dataset.candidateIdx] = e.target.value; });
+    });
+  }
+
+  if(subj==="listening") wireListeningAudio(v);
+
+  document.getElementById("submitBtn").onclick = () => submitExam();
+
+  attachTabGuard();
+
+  examTimerId = setInterval(()=>{
+    s.timeLeftSec -= 1;
+    const pill = document.getElementById("timerPill");
+    if(pill){
+      pill.textContent = formatTime(s.timeLeftSec);
+      if(s.timeLeftSec <= 60) pill.classList.add("low");
+    }
+    if(s.timeLeftSec <= 0){
+      clearExamTimer();
+      submitExam();
+    }
+  },1000);
+}
+
+function renderListeningMedia(v){
+  return `
+    <button class="headphone-btn" id="playBtn">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+        <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+      </svg>
+      <span id="playLabel">Tap to play audio (once only)</span>
+    </button>
+    <audio id="examAudio" preload="none" style="display:none;" src="${toDriveDirect(v.audioLink)}"></audio>
+    <p class="muted">You can only play this recording once. There's no rewind, pause, or replay — listen carefully.</p>
+  `;
+}
+
+function wireListeningAudio(v){
+  const btn = document.getElementById("playBtn");
+  const audio = document.getElementById("examAudio");
+  const label = document.getElementById("playLabel");
+  const s = state.examSession;
+  if(s.hasPlayedAudio){
+    btn.disabled = true;
+    label.textContent = "Audio already played";
+    return;
+  }
+  btn.onclick = () => {
+    audio.play();
+    s.hasPlayedAudio = true;
+    btn.disabled = true;
+    label.textContent = "Playing...";
+  };
+  audio.onended = () => { label.textContent = "Audio finished — this was your only play."; };
+}
+
+let tabGuardHandler = null;
+function attachTabGuard(){
+  detachTabGuard();
+  tabGuardHandler = () => {
+    const s = state.examSession;
+    if(!s || s.submitted) return;
+    if(document.hidden){
+      s.wasHidden = true;
+    } else if(s.wasHidden){
+      s.wasHidden = false;
+      s.tabSwitchCount = (s.tabSwitchCount||0) + 1;
+      if(s.tabSwitchCount >= 2){
+        submitExam();
+      } else {
+        showTabWarning();
+      }
+    }
+  };
+  document.addEventListener("visibilitychange", tabGuardHandler);
+}
+function detachTabGuard(){
+  if(tabGuardHandler){
+    document.removeEventListener("visibilitychange", tabGuardHandler);
+    tabGuardHandler = null;
+  }
+}
+function showTabWarning(){
+  const backdrop = document.createElement("div");
+  backdrop.className = "code-modal-backdrop";
+  backdrop.innerHTML = `
+    <div class="code-modal">
+      <div style="font-size:20px; font-weight:600; color:var(--bad); margin-bottom:10px;">Tab switch detected</div>
+      <div class="muted" style="margin-bottom:20px;">Leaving the exam tab is recorded. Do it again and your exam will be submitted automatically as-is.</div>
+      <button class="btn-solid" id="closeWarn">Continue exam</button>
+    </div>
+  `;
+  document.body.appendChild(backdrop);
+  document.getElementById("closeWarn").onclick = () => document.body.removeChild(backdrop);
+}
+
+let examTimerId = null;
+function clearExamTimer(){ if(examTimerId){ clearInterval(examTimerId); examTimerId = null; } }
+function formatTime(totalSec){
+  const t = Math.max(0,totalSec);
+  const m = Math.floor(t/60).toString().padStart(2,"0");
+  const sec = Math.floor(t%60).toString().padStart(2,"0");
+  return `${m}:${sec}`;
+}
+
+async function submitExam(){
+  const s = state.examSession;
+  if(s.submitted) return;
+  s.submitted = true;
+  clearExamTimer();
+  detachTabGuard();
+
+  const payload = {
+    subject: s.subject,
+    variationId: s.variation.id,
+    candidateEmail: s.candidateEmail,
+    submittedAtMs: Date.now(),
+    submittedAt: serverTimestamp(),
+    contacted: false
+  };
+  if(s.subject==="writing"){
+    payload.essayText = s.essayText;
+  } else {
+    payload.answers = s.answers;
+    payload.correctAnswers = s.variation.answers || [];
+  }
+
+  try{
+    await addDoc(collection(db,"submissions"), payload);
+  } catch(err){
+    console.error("Submission failed", err);
+  }
+
+  root.innerHTML = `
+    ${topbar("Demo Testing")}
+    <div class="container">
+      <div class="login-card" style="text-align:center;">
+        <h1>Exam submitted</h1>
+        <p class="muted">Thanks — your ${SUBJECT_LABELS[s.subject]} exam has been submitted. The administrator will contact you with your results.</p>
+      </div>
+    </div>
+  `;
+}
+
+/* ============================ INIT ============================ */
+
+onAuthStateChanged(auth, (user) => {
+  if(user && state.view === "login"){
+    state.view = "admin_home";
+    render();
+  }
+});
+
+render();
+</script>
 </body>
 </html>
